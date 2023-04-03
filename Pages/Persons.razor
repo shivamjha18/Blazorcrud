@@ -1,0 +1,60 @@
+﻿@page "/Persons"
+@using crud.Services;
+@inject IJSRuntime jsRuntime
+@inject IPersonService personService
+<h3>Persons</h3>
+<a href="/person/add" class="btn btn-success">Add More</a> 
+<div class="row">
+    <div class="col-md-6">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                    
+                
+                </tr>
+            </thead>
+            @foreach(var person in persons){
+            <tbody>
+                <tr>
+                    <td>@person.Name</td>
+                    <td>@person.Email</td>
+                    <td>
+                        <a href="/person/edit/@person.Id" class="btn btn-success">Edit</a>
+                        <button class="btn btn-danger" @onclick="async () => await Delete(person)">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+            }
+        </table>
+
+    </div>
+
+</div>
+
+@code {
+    private List<Models.Person> persons = new();
+
+    private async Task Delete(Models.Person person)
+    {
+        bool confirmed = await jsRuntime.InvokeAsync<bool>("are u sure?");
+        if (confirmed)
+        {
+            if (personService.Delete(person.Id))
+            {
+
+                persons.Remove(person);
+            }
+
+        }
+
+    }
+
+    protected override void OnInitialized()
+    {
+        persons = personService.GetAll();
+        base.OnInitialized();
+    }
+}
